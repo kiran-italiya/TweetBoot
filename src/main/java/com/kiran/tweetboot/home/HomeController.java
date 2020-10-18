@@ -33,7 +33,7 @@ public class HomeController {
 
 	private Logger log = LoggerFactory.getLogger(getClass());
 
-	private static Integer MAX_RESULTS = 10;
+	private static Integer MAX_RESULTS = 20;
 	private static String EXPANSIONS = "attachments.media_keys,referenced_tweets.id,author_id";
 	private static String MEDIA_FIELDS = "media_key,type,height,preview_image_url,url,width";
 	private static String TWEET_FIELDS = "created_at,public_metrics,entities,source,attachments,referenced_tweets,author_id";
@@ -65,7 +65,6 @@ public class HomeController {
 				}
 				System.out.println(tags.toString());
 				uri.queryParam("query", tags.toString());
-//			uri.queryParam("query", "@italiya_kiran");
 				uri.queryParam("expansions", EXPANSIONS);
 				uri.queryParam("media.fields", MEDIA_FIELDS);
 				uri.queryParam("tweet.fields", TWEET_FIELDS);
@@ -73,15 +72,10 @@ public class HomeController {
 				uri.queryParam("max_results", MAX_RESULTS);
 				System.out.println(uri.build(false).toUri());
 				tweets = searchService.getTweets(uri.build(false).toUri());
-//			tweets.put("query", "@italiya_kiran");
 				tweets.put("query", tags.toString());
 			}
 			model.addAttribute("tweets", tweets);
-//			if(live_users.getAndIncrement()==0){
 			return "index";
-//			}else{
-//				return "trending_only";
-//			}
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
