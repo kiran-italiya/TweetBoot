@@ -1,0 +1,20 @@
+#tweeter API credentials
+tweeter:
+  api:
+    api-key: ${TWITTER_API_KEY}
+    api-secret-key: ${TWITTER_API_SECRET_KEY}
+    bearer-string: Bearer ${TWITTER_BEARER_TOKEN}
+    bearer-token: ${TWITTER_BEARER_TOKEN}
+
+#server-config
+server:
+  port: 8080
+  servlet:
+    context-path: /
+
+#database and jpa/hibernate-config
+spring:
+  mvc:
+    view:
+      prefix: /WEB-INF/
+      suffix: .jsp

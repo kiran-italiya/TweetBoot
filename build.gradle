@@ -1,0 +1,63 @@
+plugins {
+	id 'org.springframework.boot' version '2.2.9.RELEASE'
+	id 'io.spring.dependency-management' version '1.0.9.RELEASE'
+	id 'java'
+}
+
+group = 'com.kiran'
+version = '0.0.1-SNAPSHOT'
+sourceCompatibility = '1.8'
+
+repositories {
+	mavenCentral()
+}
+
+configurations {
+	developmentOnly
+	runtimeClasspath {
+		extendsFrom developmentOnly
+	}
+	compileOnly {
+		extendsFrom annotationProcessor
+	}
+	implementation {
+        exclude group: "com.zaxxer"
+    }
+}
+
+dependencies {
+	implementation 'org.springframework.boot:spring-boot-starter-web'
+
+	implementation 'org.springframework.boot:spring-boot-starter-webflux'
+	implementation 'io.projectreactor:reactor-test'
+
+	developmentOnly 'org.springframework.boot:spring-boot-devtools'
+
+	compile group: 'javax.servlet', name: 'jstl', version: '1.2'
+	compile group: 'org.apache.tomcat.embed', name: 'tomcat-embed-jasper', version: '9.0.38'
+
+	// https://mvnrepository.com/artifact/org.springframework.boot/spring-boot-starter-validation
+	implementation 'org.springframework.boot:spring-boot-starter-validation'
+
+	// https://mvnrepository.com/artifact/org.apache.tomcat/tomcat-jdbc
+	compile group: 'org.apache.tomcat', name: 'tomcat-jdbc', version: '9.0.22'
+
+	// https://mvnrepository.com/artifact/org.modelmapper/modelmapper
+	compile group: 'org.modelmapper', name: 'modelmapper', version: '2.3.3'
+
+	testImplementation('org.springframework.boot:spring-boot-starter-test') {
+		exclude group: 'org.junit.vintage', module: 'junit-vintage-engine'
+	}
+	testImplementation 'org.junit.jupiter:junit-jupiter-api:5.4.2'
+	testImplementation 'org.junit.jupiter:junit-jupiter-params:5.4.2'
+	testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.4.2'
+
+	configurations.all {
+		exclude module: 'slf4j-log4j12'
+	}
+
+}
+
+test {
+	useJUnitPlatform()
+}
