@@ -5,3 +5,8 @@ os:
   - linux
 before_install:
  - chmod +x gradlew
+deploy:
+  provider: heroku
+  api_key:
+    secure: UuKBi89u0Sqasic7S0ubziBSo/de4+Xw+tlpsebyMCGFk1fVAXvS6Z9YjT1hOcniMIr9DvC87kkg/9Z1TCLBRjm7Z5iQf43s+QSKR46lAVqqzr96NlH5/GDpz5dOvUa9tIHRU4qSU2Q5WrHJaABcCYq+ufC2ZUmC48q7ozEiUhsjgcGsAsvd+gnfaGoLW0y+n6z02xMsJqCiVwDVBWzSD02phHX5f7zA6DEs7aisciDADSdzLjxu+fdjpar7M9otvW7AVT4kDqZvw4LNdIHzSzTCE5e8QugUAjy5f+iSMRhgu0J2E0ogUb6Unu25PXkEq7GORW+UlbXkhvd/vEUWMS1LWhA/Mu6HKMJelTiG/peZi0ayeoL8eVW9X2BjCf3E3hAi9/nk2m6vOQ2Y0Xh3aDCYIYxjLdeGnO2vKiISZZjPA1RdgR+vSuLSGFkxnqxda2mEjRTVicyylRQjismGXXp2S7fROtYYCjtiKjXoIBz9toYllDaUX8fb9siMnsC/+4yirue56iSMA4d86xM9KhD3E9XkSGwQS/mjs6aQapb7GzLruJCVzXT1uk/hMdAd/u+hstWsffLFG/pT5nuefJ9hsLRRu51ybfhUlOi8/jWr5jQ3gxeEEvD4P/xn2+71I+f/gnm9WBSSk9/lfIHa6sVxZlZ5iw+RemsjiALZhEM=
+    on: main
