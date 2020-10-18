@@ -17,7 +17,7 @@ No third-party library is used for fetching or streaming tweets from Twitter API
 - [Twitter API v2](https://developer.twitter.com/en/docs/twitter-api/early-access)
 
 ### Preview
-<a href="https://ibb.co/s93XgHm"><img src="https://i.ibb.co/Kxy85w0/ezgif-com-gif-maker-1.gif" alt="ezgif-com-gif-maker-1" border="0"></a>
+![TweetBoot Preview](TweetBoot-Preview.gif)
 
 ---
 ### *Note*
