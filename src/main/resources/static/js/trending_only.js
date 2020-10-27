@@ -1,55 +1,53 @@
 let query = null;
-let next_token = null;
+let nextToken = null;
 
-let event_source = null;
 
-// tweetsData = JSON.parse(tweetsData);
 query = tweetsData.query;
-next_token = tweetsData.meta.next_token;
-marshalTweetsAndAppend($("#tweets-feed"));
+nextToken = tweetsData.meta.next_token;
+marshalTweetsAndAppend($("#tweets-feed"), tweetsData);
 
 $(document).ready(function () {
 
+    initializeImagePreview();
+
     $(window).scroll(function () {
         if ($(window).scrollTop() + $(window).height() >= $(document).height()) {
-            $(".loading").show();
-            if (next_token) {
-                ajaxFunc("POST", "/next", {
-                    query: query,
-                    next_token: next_token
-                }, 2, function (data, statusText, jqXHR) {
-                    let resp = jqXHR.responseText || data.responseText;
-                    if (resp) {
-                        resp = JSON.parse(resp);
-                        // if (resp.isError === 'N') {
-                        // tweetsData = JSON.parse(resp.tweetsData);
-                        tweetsData = resp;
-                        marshalTweetsAndAppend($("#tweets-feed"));
-                        $(".loading").hide();
-                        // } else {
-                        //     errorMessage(resp.errorType, resp.errorString, resp.errorTitle);
-                        // }
-                    } else {
-                        errorMessage("error", "Something Went Wrong on Server-Side", "Ooops!");
-                    }
-                })
+            if (query != null) {
+                $(".loading").show();
+                if (nextToken) {
+                    ajaxFunc("POST", "/next", {
+                        query: query,
+                        next_token: nextToken
+                    }, 2, function (data, statusText, jqXHR) {
+                        let resp = jqXHR.responseText || data.responseText;
+                        if (resp) {
+                            resp = JSON.parse(resp);
+                            if (resp.isError === 'N') {
+                                marshalTweetsAndAppend($("#tweets-feed"), resp.tweetsData);
+                                $(".loading").hide();
+                            } else {
+                                errorMessage("error", "Unable to Load Next Tweets", "Ooops!");
+                            }
+                        } else {
+                            errorMessage("error", "Something Went Wrong on Server-Side", "Ooops!");
+                        }
+                    })
+                }
             }
         }
     });
 
 });
 
-function marshalTweetsAndAppend(tweetsFeedSelector) {
+function marshalTweetsAndAppend(tweetsFeedSelector, tweetsData) {
     if (tweetsData) {
         query = tweetsData.query;
-        next_token = tweetsData.meta ? tweetsData.meta.next_token : null;
+        nextToken = tweetsData.meta ? tweetsData.meta.next_token : null;
 
-        let users_dict = makeUsersDict(tweetsData.includes.users);
-        let media_dict = makeMediaDict(tweetsData.includes.media);
+        let usersDict = makeUsersDict(tweetsData.includes.users);
+        let mediaDict = makeMediaDict(tweetsData.includes.media);
 
         for (let tweet of tweetsData.data) {
-
-            let author_id = tweet.author_id;
 
             tweetsFeedSelector.append(`
             <ul class="bg-white rounded-lg shadow mb-8">
@@ -59,13 +57,13 @@ function marshalTweetsAndAppend(tweetsFeedSelector) {
                                 <div class="flex-shrink-0 mr-5">
                                     <div class="cursor-pointer font-bold w-12 h-12 bg-gray-300 flex items-center justify-center rounded-full">
                                         <img class="flex items-center justify-center rounded-full"
-                                             src="${users_dict[tweet.author_id].profile_image_url}">
+                                             src="${usersDict[tweet.author_id].profile_image_url}">
                                     </div>
                                 </div>
                                 <div class="flex-1">
                                     <div>
-                                        <strong class="font-bold text-gray-800 mr-2">${users_dict[tweet.author_id].name}</strong>
-                                        <span class="text-gray-600">@${users_dict[tweet.author_id].username}</span>
+                                        <strong class="font-bold text-gray-800 mr-2">${usersDict[tweet.author_id].name}</strong>
+                                        <span class="text-gray-600">@${usersDict[tweet.author_id].username}</span>
                                         <span class="mx-1 text-gray-500">&bull;</span>
                                         <span class="text-gray-600">${formatDate(tweet.created_at)}</span>
                                     </div>
@@ -75,7 +73,7 @@ function marshalTweetsAndAppend(tweetsFeedSelector) {
                                     </div>
 
                                     <div class="relative w-auto mb-2 border rounded-lg relative bg-gray-100 mb-4 shadow-inset overflow-hidden">
-                                        ${allMediaHtmlElements(tweet, media_dict)}
+                                        ${allMediaHtmlElements(tweet, mediaDict)}
                                     </div>
 
                                     <div class="flex items-center w-full">
@@ -125,7 +123,7 @@ function marshalTweetsAndAppend(tweetsFeedSelector) {
                         </li>
                     </div>
                 </ul>
-        `);
+            `);
         }
     }
 }
@@ -150,16 +148,29 @@ function makeMediaDict(media) {
     return mediaDict;
 }
 
-function allMediaHtmlElements(tweet, media_dict) {
+function allMediaHtmlElements(tweet, mediaDict) {
     let str = "";
     if (tweet.attachments && tweet.attachments.media_keys) {
-        for (let media_id of tweet.attachments.media_keys) {
-            str += `<div class="gg-container">
-                        <div class="gg-box square-gallery" style="margin: 0">
-                            <img class="object-cover w-full" src="${media_dict[media_id].url}"/>
-                        </div>
+        if (tweet.attachments.media_keys.length > 0) {
+            str += `<div class="gg-container">`;
+            for (let mediaId of tweet.attachments.media_keys) {
+                if (mediaDict[mediaId].type === "photo") {
+                    str += `<div class="gg-box square-gallery" style="margin: 0">
+                                <a href="#" class="zoom img-prev" data-toggle="modal" data-target="#lightbox"> 
+                                <img class="object-cover w-full" src="${mediaDict[mediaId].url}" alt="..."/>
+                                <span class="overlay"><i class="glyphicon glyphicon-fullscreen"></i></span></a>
                     </div>`;
+                } else if (mediaDict[mediaId].type === "animated_gif" || mediaDict[mediaId].type === "video") {
+                    str += `<div class="gg-box square-gallery" style="margin: 0">
+                                <a href="#" class="zoom img-prev" data-toggle="modal" data-target="#lightbox"> 
+                                <img class="object-cover w-full" src="${mediaDict[mediaId].preview_image_url}" alt="..."/>
+                                <span class="overlay"><i class="glyphicon glyphicon-fullscreen"></i></span></a>
+                            </div>`;
+                }
+            }
+            str += `</div>`;
         }
+
     }
     return str;
 }

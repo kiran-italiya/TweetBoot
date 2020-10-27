@@ -13,7 +13,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
-import org.springframework.stereotype.Service;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.client.HttpClientErrorException;
@@ -22,10 +21,8 @@ import org.springframework.web.util.UriComponentsBuilder;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.StringJoiner;
+import javax.servlet.http.HttpSession;
+import java.util.*;
 
 @Controller
 @RequestMapping("/")
@@ -42,6 +39,11 @@ public class HomeController {
 	private static String TWITTER_HANDLE_REGEX = "(?<=^|(?<=[^a-zA-Z0-9-_\\.]))@([A-Za-z]+[A-Za-z0-9-_]+)";
 	private static String TWITTER_HASHTAG_REGEX = "(?<=^|(?<=[^a-zA-Z0-9-_\\.]))#([A-Za-z]+[A-Za-z0-9-_]+)";
 
+	private String currSessionId = null;
+	private Date lastDate = new Date();
+
+	private Integer TIMEOUT = 600000;
+
 
 	@Autowired
 	private SearchService searchService;
@@ -52,9 +54,17 @@ public class HomeController {
 	@Autowired
 	private WebClient webClient;
 
+	@Autowired
+	private HttpSession session;
+
 	@GetMapping()
 	public String loadHomePage(Model model) {
 		try {
+
+			if(currSessionId!=null && new Date().getTime()- lastDate.getTime()>TIMEOUT){
+				currSessionId = null;
+			}
+
 			ObjectNode tweets = null;
 			ArrayList<String> hashtags = searchService.getTrendingHashtags();
 			UriComponentsBuilder uri = UriComponentsBuilder.newInstance().scheme("https").host("api.twitter.com").path("/2/tweets/search/recent");
@@ -75,7 +85,17 @@ public class HomeController {
 				tweets.put("query", tags.toString());
 			}
 			model.addAttribute("tweets", tweets);
-			return "index";
+			if(currSessionId==null){
+				currSessionId = session.getId();
+				lastDate = new Date();
+				return "index";
+			}else{
+				if(session.getId().equals(currSessionId)){
+					return "index";
+				}else{
+					return "trending_only";
+				}
+			}
 		} catch (Exception e) {
 			e.printStackTrace();
 		}

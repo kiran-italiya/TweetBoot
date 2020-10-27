@@ -3,20 +3,39 @@
 <html>
 <head>
     <title>TweetBoot</title>
-    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
-    <link rel="stylesheet" href="https://unpkg.com/tailwindcss@^1.0/dist/tailwind.min.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-tagsinput/0.8.0/bootstrap-tagsinput.css" integrity="sha512-xmGTNt20S0t62wHLmQec2DauG9T+owP9e6VU8GigI0anN7OXLip9i7IwEhelasml2osdxX71XcYm6BQunTQeQg==" crossorigin="anonymous" />
-    <script src="https://cdn.jsdelivr.net/gh/alpinejs/alpine@v2.x.x/dist/alpine.js" defer></script>
+    <link rel="stylesheet" href="/assets/css/bootstrap.min.css"/>
+    <link rel="stylesheet" href="/assets/css/tailwind.min.css"/>
+    <link rel="stylesheet" href="/assets/css/bootstrap-tagsinput.css"/>
+    <link rel="stylesheet" href="/assets/css/jquery.toast.min.css"/>
+    <script src="/assets/js/alpine.js" defer></script>
     <style>
         [x-cloak] {
             display: none;
         }
+
         .center {
             text-align: center;
+        }
+
+        .bootstrap-tagsinput .tag {
+
+            margin-right: 2px;
+            color: white;
+            background-color: #1DA1F2;
+            padding: 3px;
+            border-radius: 5px;
+            border-color: #125dc5;
+        }
+
+        .bootstrap-tagsinput {
+            line-height: 26px;
         }
     </style>
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <link rel="stylesheet" type="text/css" href="css/home.css">
+    <link rel="icon" href="/assets/tweetboot_logo.png" type="image/png"
+          sizes="16x16">
+
 
 </head>
 <body class="antialiased sans-serif bg-gray-200">
@@ -26,8 +45,9 @@
             <div class="flex justify-between items-center">
                 <div class="text-lg md:text-xl font-bold text-gray-800">TweetBoot</div>
                 <div class="relative" x-data="{ open: false }" x-cloak>
-                    <div @click="open = !open"
-                         class="cursor-pointer font-bold w-12 h-12 bg-white flex items-center justify-center rounded-full">
+                    <div
+                    <%--                            @click="open = !open"--%>
+                            class="cursor-pointer font-bold w-12 h-12 bg-white flex items-center justify-center rounded-full">
                         <img class="flex items-center justify-center rounded-full"
                              src="https://www.clipartkey.com/mpngs/m/81-816025_cute-twitter-icon-png.png">
                     </div>
@@ -52,15 +72,16 @@
 
             <div class="md:w-1/3 px-4">
                 <ul class="bg-white rounded-lg shadow mb-8">
-                <li class="px-6 py-3 border-b border-gray-200">
-                    <div class="font-bold text-gray-800">Filters</div>
-                </li>
+                    <li class="px-6 py-3 border-b border-gray-200">
+                        <div class="font-bold text-gray-800">Filters</div>
+                    </li>
 
-                <li class="px-6 py-3" class="border-b border-gray-200">
-                    <label class="mt-1">Sorry, Only One User Can Stream Live Tweets. But enjoy Trending Tweets.</label>
-                </li>
+                    <li class="px-6 py-3" class="border-b border-gray-200">
+                        <label class="mt-1">Sorry, Only One User Can Stream Live Tweets. But enjoy Trending
+                            Tweets.</label>
+                    </li>
 
-            </ul>
+                </ul>
             </div>
 
             <div class="md:w-2/4 px-4">
@@ -70,9 +91,10 @@
 
                         </div>
                     </li>
-                    <li>
-                        <div class="loading text-center" style="display: none">
-                            <img src="http://www.encephalopathy.or.kr/common/images/loader/ajax-loader/ajax_loader_blue_32.gif" />
+                    <li class="text-center">
+                        <div class="loading"
+                             style="text-align: left;width: 10%;position:relative;left: 45%;display: none">
+                            <img src="/assets/loading.gif"/>
                         </div>
                     </li>
                 </ul>
@@ -176,8 +198,23 @@
     <div class="pb-10 text-center">
         <p class="text-gray-600">By <a
                 class="text-blue-600 hover:text-blue-500 border-b-2 border-blue-200 hover:border-blue-300"
-                href="https://www.linkedin.com/in/kiran-italiya/">Kiran Italiya</a>.
+                href="https://www.linkedin.com/in/kiran-italiya/">Kiran Italiya</a> With Spring Boot.
         </p>
+    </div>
+</div>
+
+<div id="lightbox" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="myLargeModalLabel"
+     aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                <%--                <h4 class="modal-title" id="myModalLabel">Beautiful Mountains</h4>--%>
+            </div>
+            <div class="modal-body">
+                <img src="" alt=""/>
+            </div>
+        </div>
     </div>
 </div>
 
@@ -188,14 +225,11 @@
 
 </script>
 
-<script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
-<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-toast-plugin/1.3.2/jquery.toast.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.16.0/umd/popper.min.js"></script>
-<script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-tagsinput/0.8.0/bootstrap-tagsinput.min.js" integrity="sha512-9UR1ynHntZdqHnwXKTaOm1s6V9fExqejKvg5XMawEMToW4sSw+3jtLrYfZPijvnwnnE8Uol1O9BcAskoxgec+g==" crossorigin="anonymous"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/sockjs-client/1.5.0/sockjs.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/stomp.js/2.3.3/stomp.min.js" integrity="sha512-iKDtgDyTHjAitUDdLljGhenhPwrbBfqTKWO1mkhSFH3A7blITC9MhYon6SjnMhp4o0rADGw9yAC6EW4t5a4K3g==" crossorigin="anonymous"></script>
+<script src="/assets/js/jquery-3.5.1.min.js"></script>
+<script src="/assets/js/jquery.toast.min.js"></script>
+<script src="/assets/js/popper.min.js"></script>
+<script src="/assets/js/bootstrap.min.js"></script>
+<script src="/assets/js/bootstrap-tagsinput.min.js"></script>
 <script src="js/util.js"></script>
 <script src="js/trending_only.js"></script>
 </body>

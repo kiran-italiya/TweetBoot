@@ -63,6 +63,22 @@ const ajaxFunc = function (method, url, data, sendAs, callback) {
         .fail(callback);
 };
 
+function initializeImagePreview() {
+    let $lightbox = $('#lightbox');
+    $(document).on('click', 'a.img-prev', function (event) {
+        let $img = $(this).find('img'),
+            src = $img.attr('src'),
+            alt = $img.attr('alt');
+        $lightbox.find('img').attr('src', src);
+        $lightbox.find('img').attr('alt', alt);
+    });
+    $lightbox.on('shown.bs.modal', function (e) {
+        let $img = $lightbox.find('img');
+        $lightbox.find('.modal-dialog').css({'width': $img.width()});
+        $lightbox.find('.close').removeClass('hidden');
+    });
+}
+
 function errorMessage(toastrType, message, title) {
     switch (toastrType.toLowerCase()) {
         case "info":

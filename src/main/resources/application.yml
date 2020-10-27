@@ -11,6 +11,9 @@ server:
   port: 8080
   servlet:
     context-path: /
+    session:
+      timeout: 600
+
 
 #database and jpa/hibernate-config
 spring:
