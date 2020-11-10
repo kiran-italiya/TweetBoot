@@ -1,4 +1,4 @@
-package com.kiran.tweetboot.integration;
+package com.kiran.tweetboot;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
@@ -9,7 +9,6 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
-import org.springframework.mock.web.MockAsyncContext;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
@@ -18,18 +17,17 @@ import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.context.WebApplicationContext;
 
-import javax.servlet.AsyncListener;
 import java.util.ArrayList;
 import java.util.Arrays;
 
 import static org.hamcrest.Matchers.is;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.junit.jupiter.api.Assumptions.assumeTrue;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.asyncDispatch;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-@SpringBootTest
-public class TweetSearchIntegrationTests {
+@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
+public class TweetSearchIntegrationTestsIT {
 
 	private MockMvc mockMvc;
 
@@ -90,23 +88,7 @@ public class TweetSearchIntegrationTests {
 		} catch (InvalidUserDataException ex) {
 			// this is valid exception
 		} catch (Exception ex) {
-			fail("Sream rule reset and add failed with exception : ", ex);
+			fail("Stream rule reset and add failed with exception : ", ex);
 		}
 	}
-
-	@Test
-	@DisplayName("Stream Tweets")
-	public void tweetsStreamingTest() throws Exception {
-		MvcResult result = mockMvc.perform(MockMvcRequestBuilders.get("/stream"))
-				.andExpect(request().asyncStarted())
-				.andReturn();
-		MockAsyncContext ctx = (MockAsyncContext) result.getRequest().getAsyncContext();
-//			ctx.setTimeout(1500);
-		for (AsyncListener listener : ctx.getListeners()) {
-			listener.onTimeout(null);
-		}
-		mockMvc.perform(asyncDispatch(result))
-				.andExpect(status().isOk());
-	}
-
 }
