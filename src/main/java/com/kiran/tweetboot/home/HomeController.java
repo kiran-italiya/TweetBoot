@@ -9,17 +9,11 @@ import com.kiran.tweetboot.service.StreamService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.client.HttpClientErrorException;
-import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.util.UriComponentsBuilder;
-import reactor.core.publisher.Flux;
-import reactor.core.publisher.Mono;
 
 import javax.servlet.http.HttpSession;
 import java.util.*;
@@ -39,8 +33,8 @@ public class HomeController {
 	private static String TWITTER_HANDLE_REGEX = "(?<=^|(?<=[^a-zA-Z0-9-_\\.]))@([A-Za-z]+[A-Za-z0-9-_]+)";
 	private static String TWITTER_HASHTAG_REGEX = "(?<=^|(?<=[^a-zA-Z0-9-_\\.]))#([A-Za-z]+[A-Za-z0-9-_]+)";
 
-	private String currSessionId = null;
-	private Date lastDate = new Date();
+	private static String currSessionId = null;
+	private static Date lastDate = new Date();
 
 	private Integer TIMEOUT = 600000;
 
@@ -52,16 +46,13 @@ public class HomeController {
 	private StreamService streamService;
 
 	@Autowired
-	private WebClient webClient;
-
-	@Autowired
 	private HttpSession session;
 
 	@GetMapping()
 	public String loadHomePage(Model model) {
 		try {
 
-			if(currSessionId!=null && new Date().getTime()- lastDate.getTime()>TIMEOUT){
+			if (currSessionId != null && new Date().getTime() - lastDate.getTime() > TIMEOUT) {
 				currSessionId = null;
 			}
 
@@ -70,7 +61,7 @@ public class HomeController {
 			UriComponentsBuilder uri = UriComponentsBuilder.newInstance().scheme("https").host("api.twitter.com").path("/2/tweets/search/recent");
 			if (hashtags.size() > 0) {
 				StringJoiner tags = new StringJoiner(" OR ");
-				for (String hashtag : hashtags.subList(0, 5)) {
+				for (String hashtag : hashtags.subList(0, hashtags.size() > 5 ? 5 : hashtags.size())) {
 					tags.add(hashtag);
 				}
 				System.out.println(tags.toString());
@@ -85,14 +76,14 @@ public class HomeController {
 				tweets.put("query", tags.toString());
 			}
 			model.addAttribute("tweets", tweets);
-			if(currSessionId==null){
+			if (currSessionId == null) {
 				currSessionId = session.getId();
 				lastDate = new Date();
 				return "index";
-			}else{
-				if(session.getId().equals(currSessionId)){
+			} else {
+				if (session.getId().equals(currSessionId)) {
 					return "index";
-				}else{
+				} else {
 					return "trending_only";
 				}
 			}
@@ -104,7 +95,7 @@ public class HomeController {
 
 	@PostMapping("/next")
 	@ResponseBody
-	public ResponseEntity<Object> nextPageTrendingTweets(@RequestParam("query") String query, @RequestParam("next_token") String nextToken) {
+	public ResponseEntity<Object> nextPageTrendingTweets(@RequestParam(value = "query", required = true) String query, @RequestParam(value = "next_token", required = true) String nextToken) {
 		HashMap<String, Object> responseMap = new HashMap<>();
 		ObjectNode tweets = JsonNodeFactory.instance.objectNode();
 		try {
@@ -116,12 +107,13 @@ public class HomeController {
 			uri.queryParam("user.fields", USER_FIELDS);
 			uri.queryParam("next_token", nextToken);
 			uri.queryParam("max_results", MAX_RESULTS);
-			System.out.println(uri.build(false).toUri());
 			tweets = searchService.getTweets(uri.build(false).toUri());
 			tweets.put("query", query);
 			responseMap.put("isError", "N");
 			responseMap.put("tweetsData", tweets);
 			return ResponseEntity.ok(responseMap);
+		} catch (TwitterAPIError e) {
+			responseMap.put("error", e.getMessage());
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -131,7 +123,7 @@ public class HomeController {
 
 	@PostMapping("/search")
 	@ResponseBody
-	public HashMap<String, String> getAndSubscribeTweetStream(@RequestParam("filters[]") List<String> filterWords) {
+	public ResponseEntity<Object> getAndSubscribeTweetStream(@RequestParam("filters[]") List<String> filterWords) {
 		HashMap<String, String> responseMap = new HashMap<>();
 		try {
 			boolean ruleAdded = false;
@@ -139,6 +131,9 @@ public class HomeController {
 			List<String> trackTags = new ArrayList<>();
 			if (filterWords.size() > 25) {
 				responseMap.put("errorString", "Twitter handles, keywords and hashtags combined should not be greater than 25");
+				throw new InvalidUserDataException("Invalid Input From User");
+			} else if (filterWords.size() == 0) {
+				responseMap.put("errorString", "At least one filter keyword required");
 				throw new InvalidUserDataException("Invalid Input From User");
 			}
 			for (String word : filterWords) {
@@ -155,7 +150,7 @@ public class HomeController {
 					trackTags.add(word.trim());
 				} else if (word.startsWith("@")) {
 					String newWord = word.substring(1);
-					queries.add("from:"+newWord+" OR to:"+newWord);
+					queries.add("from:" + newWord + " OR to:" + newWord);
 					trackTags.add(word);
 				} else {
 					queries.add(word.trim());
@@ -164,44 +159,26 @@ public class HomeController {
 			}
 
 			UriComponentsBuilder ruleUri = UriComponentsBuilder.newInstance().scheme("https").host("api.twitter.com").path("/2/tweets/search/stream/rules");
-			if (streamService.deleteAllStreamRules(ruleUri.build(false).toUri())) {
+			List<String> rules = streamService.getStreamRules(ruleUri.build(false).toUri());
+			if (rules.size() == 0) {
+				responseMap.put("isError", "N");
+				return ResponseEntity.ok(responseMap);
+			}
+			if (streamService.deleteAllStreamRules(ruleUri.build(false).toUri(), rules)) {
 				ruleAdded = streamService.addStreamRule(ruleUri.build(false).toUri(), queries, trackTags);
 			} else {
 				throw new TwitterAPIError("Error deleting old stream rules");
 			}
 			if (ruleAdded) {
 				responseMap.put("isError", "N");
-				return responseMap;
+				return ResponseEntity.ok(responseMap);
 			} else {
 				responseMap.put("errorString", "Error Occurred in Adding Rules");
 			}
 		} catch (Exception e) {
-			e.printStackTrace();
+			log.error("{}", e.getMessage());
 		}
-		System.out.println("Problem occurred here-----------");
 		responseMap.put("isError", "Y");
-		return responseMap;
-	}
-
-	@GetMapping("/stream")
-	@ResponseBody
-	public Flux<String> stream() throws Exception {
-		UriComponentsBuilder uri = UriComponentsBuilder.newInstance().scheme("https").host("api.twitter.com").path("/2/tweets/search/stream");
-		uri.queryParam("expansions", EXPANSIONS);
-		uri.queryParam("media.fields", MEDIA_FIELDS);
-		uri.queryParam("tweet.fields", TWEET_FIELDS);
-		uri.queryParam("user.fields", USER_FIELDS);
-		log.info(uri.build(false).toUri().toString());
-		return webClient.get()
-				.uri(uri.build(false).toUri())
-				.accept(MediaType.APPLICATION_JSON)
-				.retrieve()
-				.onStatus(HttpStatus::is4xxClientError, res -> {
-							res.toEntity(String.class).subscribe(
-									entity -> log.warn("Client error {}", entity)
-							);
-							return Mono.error(new HttpClientErrorException(res.statusCode()));
-						}
-				).bodyToFlux(String.class);
+		return ResponseEntity.badRequest().body(responseMap);
 	}
 }

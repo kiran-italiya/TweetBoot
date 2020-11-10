@@ -2,7 +2,6 @@ package com.kiran.tweetboot.service;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
-import com.fasterxml.jackson.databind.node.JsonNodeFactory;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.kiran.tweetboot.exception.TwitterAPIError;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -40,13 +39,21 @@ public class SearchService {
 		return hashtags;
 	}
 
-	public ObjectNode getTweets(URI url) throws Exception {
-		ObjectNode tweetsJson = restTemplate.getForObject(url, ObjectNode.class);
-		if (tweetsJson != null && !tweetsJson.isEmpty()) {
-			return tweetsJson;
-		} else {
-			throw new TwitterAPIError("Error occurred while fetching Tweets");
+	public ObjectNode getTweets(URI url) throws TwitterAPIError {
+		ObjectNode tweetsJson = null;
+		try {
+			tweetsJson = restTemplate.getForObject(url, ObjectNode.class);
+			if (tweetsJson != null && !tweetsJson.isEmpty()) {
+				return tweetsJson;
+			} else {
+				throw new TwitterAPIError("Error occurred while fetching Tweets");
+			}
+		} catch (Exception e) {
+			if (tweetsJson != null && tweetsJson.has("error")) {
+				throw new TwitterAPIError(tweetsJson.get("error").asText());
+			}
 		}
+		throw new TwitterAPIError("Error occurred while fetching Tweets");
 	}
 
 }

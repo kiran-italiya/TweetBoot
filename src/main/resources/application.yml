@@ -6,6 +6,7 @@ tweeter:
     bearer-string: Bearer ${TWITTER_BEARER_TOKEN}
     bearer-token: ${TWITTER_BEARER_TOKEN}
 
+
 #server-config
 server:
   port: 8080
@@ -21,3 +22,7 @@ spring:
     view:
       prefix: /WEB-INF/
       suffix: .jsp
+
+
+client:
+  base-url: https://api.twitter.com
