@@ -1,6 +1,6 @@
 # TweetBoot
 
-[![Build Status](https://travis-ci.com/Kiran1901/tweetboot.svg?token=uKsAy6o7ZerxUWZFdpqB&branch=main)](https://travis-ci.com/Kiran1901/tweetboot)
+[![Build Status](https://travis-ci.com/kiran-italiya/tweetboot.svg?token=uKsAy6o7ZerxUWZFdpqB&branch=main)](https://travis-ci.com/kiran-italiya/tweetboot)
 
 Java 8 is needed to run this application.
 
@@ -26,7 +26,7 @@ Twitter only allows one Filtered Stream from one developer account with bearer t
 ---
 ### Clone
 ```
-git clone https://github.com/Kiran1901/tweetboot.git
+git clone https://github.com/kiran-italiya/tweetboot.git
 ```
 ### Twitter API access credentials
 You must have developer account to access Twitter API. If you don't have account apply for it [here](https://developer.twitter.com/en/apply-for-access). Find [more info](https://developer.twitter.com/en/docs/authentication/overview) about authentication and credentials and [limits](https://developer.twitter.com/en/docs/twitter-api/rate-limits). For generation of bearer token follow [this](https://developer.twitter.com/en/docs/authentication/oauth-2-0).
